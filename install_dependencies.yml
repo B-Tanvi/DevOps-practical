@@ -1,0 +1,48 @@
+---
+- name: Install dependencies on Ubuntu server
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt repository and cache
+      apt:
+        update_cache: yes
+
+    - name: Install Apache2
+      apt:
+        name: apache2
+        state: present
+
+    - name: Install MySQL
+      apt:
+        name: mysql-server
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull Docker image (example: nginx)
+      docker_image:
+        name: nginx
+        source: pull
+
+    - name: Create a directory for ephemeral storage
+      file:
+        path: /mnt/ephemeral
+        state: directory
+
+    - name: Run Docker container with ephemeral storage
+      docker_container:
+        name: nginx_container
+        image: nginx
+        state: started
+        volumes:
+          - /mnt/ephemeral:/usr/share/nginx/html
+
